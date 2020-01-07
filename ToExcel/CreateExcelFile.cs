@@ -55,15 +55,36 @@ namespace ToExcel
         private static void CreateUtilDay(DateTime dateTime, IXLWorksheet ws)
         {
             ws.Cell(2, _col).Value = culture.DateTimeFormat.GetDayName(dateTime.DayOfWeek);
-            var rngTable = ws.Range(2, _col, 2, _col + 4);
-            rngTable.Style.Font.Bold = true;
-            rngTable.Style.Fill.BackgroundColor = XLColor.Aqua;
-            rngTable.Merge();
+            var rngHeader_l1 = ws.Range(2, _col, 2, _col + 3);
+            rngHeader_l1.FirstCell().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            rngHeader_l1.FirstRow().Merge();
+            ws.Cell(3, _col).Value = dateTime.ToString("dd/MMM/yyyy");
+            var rngHeader_l2 = ws.Range(3, _col, 3, _col + 2);
+            rngHeader_l2.FirstCell().Style.Font.SetBold().Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            rngHeader_l2.FirstRow().Merge();
+            ws.Cell(4, _col).Value     = "Tarefa";
+            ws.Cell(4, _col + 1).Value = "Início";
+            ws.Cell(4, _col + 2).Value = "Final";
+            ws.RangeUsed().Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
+            ws.Columns(_col + "-" + _col + 3).AdjustToContents();
+            for (int i = 0; i < 4; i++)
+            {
+                var col = ws.Column(_col + i);
+                col.Width = 8.43;
+            }
+            
             _col += 4;
         }
 
         private static void CreateWeekendDay(DateTime dateTime, IXLWorksheet ws)
         {
+            ws.Cell(2, _col).Value = culture.DateTimeFormat.GetDayName(dateTime.DayOfWeek);
+            ws.Cell(2, _col).Style.Font.SetBold().Fill.SetBackgroundColor(XLColor.DarkPowderBlue).Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            ws.Cell(3, _col).Value = dateTime.ToString("dd/MMM/yyyy");
+            ws.Cell(3, _col).Style.Font.SetBold().Fill.SetBackgroundColor(XLColor.DarkPowderBlue).Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            ws.Cell(4, _col).Style.Font.SetBold().Fill.SetBackgroundColor(XLColor.DarkPowderBlue).Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            ws.Column( _col).Width = 15;
+            _col += 1;
         }
 
         private static void CreateHoliday(DateTime dateTime, IXLWorksheet ws)
