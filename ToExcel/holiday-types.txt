@@ -1,0 +1,11 @@
+ 1 = feriado nacional
+ 2 = feriado estadual
+ 3 = feriado municipal
+ 4 = facultativo
+ 5 = 
+ 6 = 
+ 7 = 
+ 8 = 
+ 9 = convencional
+ 
+ 
