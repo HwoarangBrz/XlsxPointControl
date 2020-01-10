@@ -23,7 +23,7 @@ namespace ToExcel
 
         public static bool IsHolidayDate(DateTime dateTime)
         {
-            return holidayList.Where(r => DateTime.Parse(r.date).Date == dateTime.Date).ToList().Count() > 0;
+            return holidayList.Where(r => DateTime.Parse(r.date).Date == dateTime.Date && int.Parse(r.type_code) <= 4).ToList().Count() > 0;
         }
 
         public static string GetHolidayName(DateTime dateTime)
@@ -75,7 +75,7 @@ namespace ToExcel
         public string link { get; set; }
         public string type { get; set; }
         public string description { get; set; }
-        public object type_code { get; set; }
+        public string type_code { get; set; }
         public string raw_description { get; set; }
     }
 

@@ -50,36 +50,37 @@ namespace ToExcel
                     }
                 }
             }
-            wb.ReferenceStyle = XLReferenceStyle.R1C1;
             wb.CalculateMode = XLCalculateMode.Auto;
-            string filePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\ControleDePonto_" + _reference.Year + "_" + _reference.Month + ".xlsx";
+            string filePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\ControleDePonto_" + _reference.Year + culture.DateTimeFormat.GetAbbreviatedMonthName(dateTime.Month) + ".xlsx";
             wb.SaveAs(filePath);
             Console.WriteLine("Concluído. Verifique em " + filePath);
         }
-        /*
-        =CONCATENAR(TEXTO(Z4;"DD/MM/AA");" - ";TEXTO(Z4;"DDD");
-                    SE(Z6<>"";CONCATENAR(CARACT(9);TEXTO(AA6;"HH:MM");CARACT(9);TEXTO(AB6;"HH:MM"));"");
-                    SE(Z7<>"";CONCATENAR(CARACT(9);TEXTO(AA7;"HH:MM");CARACT(9);TEXTO(AB7;"HH:MM"));"");
-                    SE(Z8<>"";CONCATENAR(CARACT(9);TEXTO(AA8;"HH:MM");CARACT(9);TEXTO(AB8;"HH:MM"));"");
-                    SE(Z9<>"";CONCATENAR(CARACT(9);TEXTO(AA9;"HH:MM");CARACT(9);TEXTO(AB9;"HH:MM"));"");
-                    SE(Z10<>"";CONCATENAR(CARACT(9);TEXTO(AA10;"HH:MM");CARACT(9);TEXTO(AB10;"HH:MM"));"");
-                    SE(Z11<>"";CONCATENAR(CARACT(9);TEXTO(AA11;"HH:MM");CARACT(9);TEXTO(AB11;"HH:MM"));"");
-                    SE(Z12<>"";CONCATENAR(CARACT(9);TEXTO(AA12;"HH:MM");CARACT(9);TEXTO(AB12;"HH:MM"));"");
-                    SE(Z13<>"";CONCATENAR(CARACT(9);TEXTO(AA13;"HH:MM");CARACT(9);TEXTO(AB13;"HH:MM"));""))
-        */
 
         private static void CreateUtilDay(DateTime dateTime, IXLWorksheet ws)
         {
             ws.Cell(2, _col).Value = culture.DateTimeFormat.GetDayName(dateTime.DayOfWeek);
             ws.Range(2, _col, 2, _col + 3).FirstRow().Merge();
             ws.Range(3, _col, 3, _col + 3).FirstRow().Merge();
-            ws.Cell(3, _col).Value = "";
+            string cell   = GetExcelColumnName(_col);
+            string cell_0 = GetExcelColumnName(_col + 1);
+            string cell_1 = GetExcelColumnName(_col + 2);
+            ws.Cell(3, _col).SetFormulaA1("=CONCATENATE(TEXT(" + cell + "4,\"DD/MM/AA\"),\" - \",TEXT(" + cell + "4,\"DDD\")," +
+                                          "IF(" + cell + "6 <>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "6, \"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "6, \"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "7 <>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "7, \"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "7, \"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "8 <>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "8, \"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "8, \"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "9 <>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "9, \"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "9, \"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "10<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "10,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "10,\"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "11<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "11,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "11,\"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "12<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "12,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "12,\"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "13<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "13,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "13,\"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "14<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "14,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "14,\"HH:MM\")),\"\")," +
+                                          "IF(" + cell + "15<>\"\",CONCATENATE(CHAR(9),TEXT(" + cell_0 + "15,\"HH:MM\"),CHAR(9),TEXT(" + cell_1 + "15,\"HH:MM\")),\"\"))");
             ws.Cell(4, _col).Value = "'" + dateTime.ToString("dd/MMM/yyyy");
             ws.Range(4, _col, 4, _col + 2).FirstRow().Merge();
             ws.Cell(5, _col).Value     = "Tarefa";
             ws.Cell(5, _col + 1).Value = "Início";
             ws.Cell(5, _col + 2).Value = "Final";
-            string cell = GetExcelColumnName(_col + 3);
+            cell = GetExcelColumnName(_col + 3);
             ws.Cell(cell + 4).SetFormulaA1("=SUM(" + cell + "6:" + cell + "15)")
                              .Style.NumberFormat.SetFormat("hh:mm");
 
@@ -100,6 +101,11 @@ namespace ToExcel
                            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
                            .Border.SetInsideBorder(XLBorderStyleValues.Thin)
                            .Border.SetOutsideBorder(XLBorderStyleValues.Thick);
+
+            ws.Cell(3, _col).Style.Font.SetBold(false)
+                                  .Font.SetFontSize(8)
+                                  .Font.SetFontColor(XLColor.BrickRed)
+                                  .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
             for (int i = 0; i < 4; i++)
             {
                 var col = ws.Column(_col + i);
