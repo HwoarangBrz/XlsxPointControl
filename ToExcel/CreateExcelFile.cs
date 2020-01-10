@@ -56,13 +56,25 @@ namespace ToExcel
             wb.SaveAs(filePath);
             Console.WriteLine("Concluído. Verifique em " + filePath);
         }
+        /*
+        =CONCATENAR(TEXTO(Z4;"DD/MM/AA");" - ";TEXTO(Z4;"DDD");
+                    SE(Z6<>"";CONCATENAR(CARACT(9);TEXTO(AA6;"HH:MM");CARACT(9);TEXTO(AB6;"HH:MM"));"");
+                    SE(Z7<>"";CONCATENAR(CARACT(9);TEXTO(AA7;"HH:MM");CARACT(9);TEXTO(AB7;"HH:MM"));"");
+                    SE(Z8<>"";CONCATENAR(CARACT(9);TEXTO(AA8;"HH:MM");CARACT(9);TEXTO(AB8;"HH:MM"));"");
+                    SE(Z9<>"";CONCATENAR(CARACT(9);TEXTO(AA9;"HH:MM");CARACT(9);TEXTO(AB9;"HH:MM"));"");
+                    SE(Z10<>"";CONCATENAR(CARACT(9);TEXTO(AA10;"HH:MM");CARACT(9);TEXTO(AB10;"HH:MM"));"");
+                    SE(Z11<>"";CONCATENAR(CARACT(9);TEXTO(AA11;"HH:MM");CARACT(9);TEXTO(AB11;"HH:MM"));"");
+                    SE(Z12<>"";CONCATENAR(CARACT(9);TEXTO(AA12;"HH:MM");CARACT(9);TEXTO(AB12;"HH:MM"));"");
+                    SE(Z13<>"";CONCATENAR(CARACT(9);TEXTO(AA13;"HH:MM");CARACT(9);TEXTO(AB13;"HH:MM"));""))
+        */
 
         private static void CreateUtilDay(DateTime dateTime, IXLWorksheet ws)
         {
             ws.Cell(2, _col).Value = culture.DateTimeFormat.GetDayName(dateTime.DayOfWeek);
             ws.Range(2, _col, 2, _col + 3).FirstRow().Merge();
             ws.Range(3, _col, 3, _col + 3).FirstRow().Merge();
-            ws.Cell(4, _col).Value = dateTime.ToString("dd/MMM/yyyy");
+            ws.Cell(3, _col).Value = "";
+            ws.Cell(4, _col).Value = "'" + dateTime.ToString("dd/MMM/yyyy");
             ws.Range(4, _col, 4, _col + 2).FirstRow().Merge();
             ws.Cell(5, _col).Value     = "Tarefa";
             ws.Cell(5, _col + 1).Value = "Início";
@@ -70,18 +82,17 @@ namespace ToExcel
             string cell = GetExcelColumnName(_col + 3);
             ws.Cell(cell + 4).SetFormulaA1("=SUM(" + cell + "6:" + cell + "15)")
                              .Style.NumberFormat.SetFormat("hh:mm");
-            ws.Cell(cell + 4).AddConditionalFormat().ColorScale()
-                             .Minimum(XLCFContentType.Number, 0.291666667, XLColor.Red)
-                             .Midpoint(XLCFContentType.Number, 0.291666667, XLColor.Yellow)
-                             .Maximum(XLCFContentType.Number, 0.291666667, XLColor.Green);
 
-            //.LowestValue(XLColor.Red)
-            //.Midpoint(XLCFContentType.Number, 0.291666667, XLColor.Yellow)
-            //.HighestValue(XLColor.Green);
-            //ws.Cell(cell + 4).AddConditionalFormat().IconSet(XLIconSetStyle.ThreeTrafficLights2)
-            //                 .AddValue(XLCFIconSetOperator.EqualOrGreaterThan, 0, XLCFContentType.Number)
-            //                 .AddValue(XLCFIconSetOperator.EqualOrGreaterThan, 0.291666667, XLCFContentType.Number)
-            //                 .AddValue(XLCFIconSetOperator.EqualOrGreaterThan, 0.3333, XLCFContentType.Number); //
+            ws.Cell(cell + 4).AddConditionalFormat()
+                             .WhenEqualOrLessThan(0.2916667)
+                             .Fill.SetBackgroundColor(XLColor.Red);
+            ws.Cell(cell + 4).AddConditionalFormat()
+                             .WhenBetween(0.2916668, 0.3333332)
+                             .Fill.SetBackgroundColor(XLColor.Yellow);
+            ws.Cell(cell + 4).AddConditionalFormat()
+                             .WhenGreaterThan(0.3333333)
+                             .Fill.SetBackgroundColor(XLColor.Green);
+
             ws.Cell(cell + 5).SetFormulaA1("=" + cell + 4 +"*24")
                              .Style.NumberFormat.Format = "00.00";
             var rngHeader = ws.Range(2, _col, 5, _col + 3);
@@ -98,7 +109,11 @@ namespace ToExcel
             {
                 string cell1 = GetExcelColumnName(_col + 1);
                 string cell2 = GetExcelColumnName(_col + 2);
-                ws.Cell(cell + i).SetFormulaA1("=IF(" + cell1 + i + "<>\"\"," + cell2 + i + "-" + cell1 + i + ",\" - \")");
+                ws.Cell(cell + i).SetFormulaA1("=IF(AND(" + cell1 + i + "<>\"\"," + cell2 + i + "<>\"\")," + cell2 + i + "-" + cell1 + i + ",\" - \")");
+                if (i > 6)
+                {   
+                    ws.Cell(cell1 + i).SetFormulaA1("=IF(AND(" + cell2 + (i - 1) + "<>\"\"," + GetExcelColumnName(_col) + i + "<>\"\")," + cell2 + (i - 1) + ",\"\")");
+                }
             }
             var rngBody = ws.Range(6, _col, 15, _col + 3);
             rngBody.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
